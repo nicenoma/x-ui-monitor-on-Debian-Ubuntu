@@ -1,0 +1,12 @@
+[Unit]
+Description=X-UI Process Monitor Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/x-ui-monitor.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
