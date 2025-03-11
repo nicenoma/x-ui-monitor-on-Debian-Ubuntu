@@ -8,10 +8,25 @@ touch "$LOG_FILE"
 
 # 日志清理函数
 clean_logs() {
-    # 删除超过1天的日志
-    find "$LOG_FILE" -mtime +1 -delete
-    # 如果日志文件被删除，重新创建
-    touch "$LOG_FILE"
+    # 只保留当天的日志
+    if [ -f "$LOG_FILE" ]; then
+        # 创建临时文件
+        TEMP_FILE=$(mktemp)
+        # 获取当天日期（格式：YYYY-MM-DD）
+        TODAY=$(date +%Y-%m-%d)
+        
+        # 只保留当天的日志行
+        grep -a "\[$TODAY" "$LOG_FILE" > "$TEMP_FILE" 2>/dev/null
+        
+        # 如果有内容被清理，记录清理信息
+        if ! cmp -s "$LOG_FILE" "$TEMP_FILE"; then
+            echo "$(date '+%Y-%m-%d %H:%M:%S') 已清理非当天的日志记录" >> "$TEMP_FILE"
+            cat "$TEMP_FILE" > "$LOG_FILE"
+        fi
+        
+        # 删除临时文件
+        rm -f "$TEMP_FILE"
+    fi
 }
 
 # 检查x-ui进程状态并记录日志的函数
